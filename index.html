@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>生态瓶模拟装置 / ECOSPHERE SIMULATOR</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 34 34" width="34" height="34">
+          <rect x="6" y="3" width="22" height="28" rx="4" fill="none" stroke="currentColor" stroke-width="1.4" />
+          <path d="M6 13h22" stroke="currentColor" stroke-width="1" />
+          <path d="M11 24c2-3 4-3 6 0s4 3 6 0" fill="none" stroke="currentColor" stroke-width="1.2" />
+          <circle cx="17" cy="18" r="1.4" fill="currentColor" />
+        </svg>
+      </span>
+      <div class="brand-text">
+        <p class="micro">LAB UNIT 01 · AQUATIC CLOSED SYSTEM</p>
+        <h1>水基生态瓶模拟装置</h1>
+      </div>
+    </div>
+
+    <div class="status-strip">
+      <div class="status-chip" id="statusChip">
+        <span class="dot"></span>
+        <span id="statusText">未开始</span>
+      </div>
+      <div class="readout">
+        <span class="readout-label">ELAPSED</span>
+        <strong id="dayValue" class="readout-value">第 1 天</strong>
+      </div>
+      <div class="readout">
+        <span class="readout-label">UPTIME</span>
+        <strong id="maintainValue" class="readout-value">0.0 天</strong>
+      </div>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="stage">
+      <div class="tank-card">
+        <div class="tank-head">
+          <span class="micro">图 1 · 生态瓶剖面 / SPECIMEN VIEW</span>
+          <span class="tank-state" id="tankBadge">待开始</span>
+        </div>
+        <div class="tank-plot">
+          <canvas id="tank" aria-label="生态瓶剖面示意图"></canvas>
+        </div>
+        <div class="collapse-banner hidden" id="collapseBanner">
+          <span class="banner-flag">ALERT</span>
+          <strong>生态失衡</strong>
+          <span id="collapseText" class="banner-text"></span>
+          <button type="button" id="btnResetInline">重新配置</button>
+        </div>
+      </div>
+
+      <div class="metrics" id="metrics">
+        <article class="metric" data-metric="o2">
+          <header><span class="metric-label">溶解氧</span><span class="metric-tag">DO</span></header>
+          <div class="metric-value"><strong id="metricDo">—</strong><span class="metric-unit">mg/L</span></div>
+          <div class="bar"><i id="barDo"></i></div>
+        </article>
+        <article class="metric" data-metric="co2">
+          <header><span class="metric-label">二氧化碳</span><span class="metric-tag">CO₂</span></header>
+          <div class="metric-value"><strong id="metricCo2">—</strong><span class="metric-unit">mg/L</span></div>
+          <div class="bar"><i id="barCo2"></i></div>
+        </article>
+        <article class="metric" data-metric="detritus">
+          <header><span class="metric-label">有机废物</span><span class="metric-tag">TOC</span></header>
+          <div class="metric-value"><strong id="metricDetritus">—</strong><span class="metric-unit">mg/L</span></div>
+          <div class="bar"><i id="barDetritus"></i></div>
+        </article>
+        <article class="metric" data-metric="ph">
+          <header><span class="metric-label">酸碱度</span><span class="metric-tag">pH</span></header>
+          <div class="metric-value"><strong id="metricPh">—</strong><span class="metric-unit">est.</span></div>
+          <div class="bar"><i id="barPh"></i></div>
+        </article>
+        <article class="metric" data-metric="algae">
+          <header><span class="metric-label">藻类</span><span class="metric-tag">ALG</span></header>
+          <div class="metric-value"><strong id="metricAlgae">—</strong><span class="metric-unit">idx</span></div>
+          <div class="bar"><i id="barAlgae"></i></div>
+        </article>
+        <article class="metric" data-metric="plant">
+          <header><span class="metric-label">水草</span><span class="metric-tag">MAC</span></header>
+          <div class="metric-value"><strong id="metricPlant">—</strong><span class="metric-unit">idx</span></div>
+          <div class="bar"><i id="barPlant"></i></div>
+        </article>
+        <article class="metric" data-metric="bacteria">
+          <header><span class="metric-label">分解菌</span><span class="metric-tag">BAC</span></header>
+          <div class="metric-value"><strong id="metricBacteria">—</strong><span class="metric-unit">idx</span></div>
+          <div class="bar"><i id="barBacteria"></i></div>
+        </article>
+        <article class="metric" data-metric="animals">
+          <header><span class="metric-label">动物总数</span><span class="metric-tag">FAU</span></header>
+          <div class="metric-value"><strong id="metricAnimals">—</strong><span class="metric-unit">只</span></div>
+          <p class="metric-sub" id="metricAnimalDetail">螺 0 · 虾 0 · 鱼 0</p>
+        </article>
+      </div>
+
+      <div class="charts">
+        <figure class="chart-card">
+          <figcaption><span class="chart-label">溶解氧 DO</span><strong id="chartO2Value">—</strong></figcaption>
+          <canvas id="chart-o2"></canvas>
+        </figure>
+        <figure class="chart-card">
+          <figcaption><span class="chart-label">二氧化碳 CO₂</span><strong id="chartCo2Value">—</strong></figcaption>
+          <canvas id="chart-co2"></canvas>
+        </figure>
+        <figure class="chart-card">
+          <figcaption><span class="chart-label">有机废物 TOC</span><strong id="chartDetritusValue">—</strong></figcaption>
+          <canvas id="chart-detritus"></canvas>
+        </figure>
+        <figure class="chart-card">
+          <figcaption><span class="chart-label">生物量 ALG / MAC</span><strong id="chartBiomassValue">—</strong></figcaption>
+          <canvas id="chart-biomass"></canvas>
+        </figure>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <div class="panel-head">
+        <span class="micro">CONTROL RACK</span>
+        <h2>参数控制台</h2>
+      </div>
+
+      <div class="panel-actions">
+        <button type="button" class="btn primary" id="btnToggle">开始模拟</button>
+        <button type="button" class="btn" id="btnReset">重置</button>
+      </div>
+
+      <div class="field">
+        <label for="preset">预设场景</label>
+        <select id="preset"></select>
+        <p class="hint" id="presetHint"></p>
+      </div>
+
+      <div class="field">
+        <label>推演速度</label>
+        <div class="segmented" id="speedGroup"></div>
+      </div>
+
+      <section class="panel-section">
+        <h3><span class="num">01</span>光照</h3>
+        <div class="field">
+          <div class="field-head"><label for="light">光照强度</label><output id="lightOut">0.65</output></div>
+          <input type="range" id="light" min="0" max="1.5" step="0.05" value="0.65" />
+        </div>
+        <div class="field">
+          <div class="field-head"><label for="photoperiod">每日光照时长</label><output id="photoperiodOut">12 小时</output></div>
+          <input type="range" id="photoperiod" min="0" max="24" step="1" value="12" />
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="dayNight" checked />
+          <span>昼夜循环（关闭后为恒定光照）</span>
+        </label>
+      </section>
+
+      <section class="panel-section">
+        <h3><span class="num">02</span>环境</h3>
+        <div class="field">
+          <div class="field-head"><label for="temperature">水温</label><output id="temperatureOut">25 ℃</output></div>
+          <input type="range" id="temperature" min="10" max="35" step="0.5" value="25" />
+        </div>
+        <div class="field">
+          <div class="field-head"><label for="sealing">密封程度</label><output id="sealingOut">60%</output></div>
+          <input type="range" id="sealing" min="0" max="1" step="0.05" value="0.6" />
+          <p class="hint">越密封，与空气的气体交换越弱</p>
+        </div>
+      </section>
+
+      <section class="panel-section">
+        <h3><span class="num">03</span>瓶体</h3>
+        <div class="field">
+          <div class="field-head"><label for="volume">水量</label><output id="volumeOut">5 L</output></div>
+          <input type="range" id="volume" min="1" max="20" step="0.5" value="5" />
+        </div>
+        <div class="field">
+          <div class="field-head"><label for="substrate">底泥厚度</label><output id="substrateOut">0.6</output></div>
+          <input type="range" id="substrate" min="0" max="2" step="0.1" value="0.6" />
+          <p class="hint">底泥缓慢释放营养盐，过厚易引发藻类爆发</p>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="decomposer" checked />
+          <span>投入分解菌</span>
+        </label>
+      </section>
+
+      <section class="panel-section">
+        <h3><span class="num">04</span>生物投放</h3>
+        <div class="field">
+          <div class="field-head"><label for="plants">水草</label><output id="plantsOut">4 株</output></div>
+          <input type="range" id="plants" min="0" max="8" step="1" value="4" />
+        </div>
+        <div class="field">
+          <div class="field-head"><label for="algae">初始藻类</label><output id="algaeOut">2.0</output></div>
+          <input type="range" id="algae" min="0" max="10" step="0.5" value="2" />
+        </div>
+        <div class="field">
+          <div class="field-head"><label for="snails">螺</label><output id="snailsOut">2 只</output></div>
+          <input type="range" id="snails" min="0" max="10" step="1" value="2" />
+        </div>
+        <div class="field">
+          <div class="field-head"><label for="shrimp">虾</label><output id="shrimpOut">0 只</output></div>
+          <input type="range" id="shrimp" min="0" max="10" step="1" value="0" />
+        </div>
+        <div class="field">
+          <div class="field-head"><label for="fish">鱼</label><output id="fishOut">0 只</output></div>
+          <input type="range" id="fish" min="0" max="5" step="1" value="0" />
+          <p class="hint">鱼的耗氧量很高，小瓶内通常难以长期存活</p>
+        </div>
+      </section>
+
+      <section class="panel-section log-section">
+        <h3><span class="num">05</span>事件记录</h3>
+        <ul class="event-log" id="eventLog"></ul>
+      </section>
+    </aside>
+  </main>
+
+  <footer class="footnote">
+    <span class="micro">METHOD</span>
+    简化生态动力学模型：光合作用 / 呼吸 / 分解 / 摄食 / 气体交换。失衡判定条件为溶解氧耗尽、有机废物腐败、藻类爆发、生产者消亡或已投放动物全部死亡。生物量以相对指数表示，化学指标为近似值。
+  </footer>
+
+  <script src="js/config.js"></script>
+  <script src="js/engine.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/tank.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
